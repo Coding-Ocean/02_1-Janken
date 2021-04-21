@@ -1,4 +1,5 @@
-#if 0
+
+#if 1
 
 
 #else
@@ -15,38 +16,38 @@ void gmain(){
     int pcChokiImg     = loadImage("assets\\pcChoki.png");
     int pcPaImg        = loadImage("assets\\pcPa.png");
     int heartImg       = loadImage("assets\\heart.png");
-    //手の番号定数を決めておく
-    const int GU    = 0;
-    const int CHOKI = 1;
-    const int PA    = 2;
+    //手の番号を決めておく
+    int GU = 0;
+    int CHOKI = 1;
+    int PA = 2;
     //プレイヤーデータ
     int playerHand;
     int playerImg;
-    int playerLife;
     float playerPx;
     float playerPy;
+    float playerAngle;
     float playerR;
     float playerG;
     float playerB;
-    float playerAngle;
+    int playerLife;
     //ＰＣデータ
     int pcHand;
     int pcImg;
-    int pcLife;
     float pcPx;
     float pcPy;
+    float pcAngle;
     float pcR;
     float pcG;
     float pcB;
-    float pcAngle;
+    int pcLife;
     //勝ち負け文字用
     float resultPx;
     float resultPy;
     float resultSize;
     //状態切り替え
-    const int INIT   = 0;
-    const int PLAY   = 1;
-    const int RESULT = 2;
+    int INIT   = 0;
+    int PLAY   = 1;
+    int RESULT = 2;
     int state = INIT;
     //メインループ
     while (notQuit) {
@@ -58,21 +59,21 @@ void gmain(){
             playerImg = playerGuImg;
             playerPx = 250;
             playerPy = 225;
+            playerAngle = 0;
             playerR = 255;
             playerG = 255;
             playerB = 255;
             playerLife = 3;
-            playerAngle = 0;
             //ＰＣデータ
             pcHand = GU;
             pcImg = pcGuImg;
             pcPx = 550;
             pcPy = 225;
+            pcAngle = 0;
             pcR = 255;
             pcG = 255;
             pcB = 255;
             pcLife = 3;
-            pcAngle = 0;
             //勝ち負け文字
             resultPx = 225;
             resultPy = 320;
@@ -81,7 +82,7 @@ void gmain(){
             state = PLAY;
         }
         else if( state == PLAY ){
-            //試合中
+            //試合中-----------------------------------------------------------
             //A,S,Dいずれかのキーが押されたら
             if (isTrigger(KEY_A) || isTrigger(KEY_S) || isTrigger(KEY_D)) {
                 //プレイヤーの手を決める---------------------------------------
@@ -102,18 +103,18 @@ void gmain(){
                 if (playerHand == pcHand) {
                     //あいこ
                     playerR = 255; playerG = 255; playerB = 255;
-                    pcR = 255;     pcG = 255;     pcB = 255;
+                    pcR = 255; pcG = 255; pcB = 255;
                 }
                 else if ((playerHand + 1) % 3 == pcHand) {
                     //プレイヤー勝ち
                     playerR = 255; playerG = 200; playerB = 200;
-                    pcR = 255;     pcG = 255;     pcB = 255;
+                    pcR = 255; pcG = 255; pcB = 255;
                     pcLife--;
                 }
                 else {
                     //ＰＣ勝ち
                     playerR = 255; playerG = 255; playerB = 255;
-                    pcR = 255;     pcG = 200;     pcB = 200;
+                    pcR = 255; pcG = 200; pcB = 200;
                     playerLife--;
                 }
                 //ゲームステート切り替え---------------------------------------
@@ -145,6 +146,7 @@ void gmain(){
         }
         //描画-----------------------------------------------------------------
         clear(200);
+        print(playerHand);
         //プレイヤーの手
         rectMode(CENTER);
         imageColor(playerR, playerG, playerB);
@@ -177,3 +179,4 @@ void gmain(){
 }
 
 #endif
+
