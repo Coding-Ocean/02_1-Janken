@@ -29,193 +29,173 @@ void gmain() {
 #else
 
 #include"libOne.h"
-void draw(struct DATA* d);
-void drawResult(struct DATA* d);
+
+struct HAND {
+    int hand;
+    int img[3];
+    int heartImg;
+    float px;
+    float py;
+    float r, g, b;
+    float angle;
+    int life;
+};
+
+struct RESULT_TEXT {
+    const char* str;
+    float px;
+    float py;
+    float size;
+    float r, g, b;
+};
 
 struct DATA {
-    //手の番号を決めておく
-    int GU = 0;
-    int CHOKI = 1;
-    int PA = 2;
-    //プレイヤーデータ
-    int playerHand;
-    int playerGuImg;
-    int playerChokiImg;
-    int playerPaImg;
-    int playerImg;
-    float playerPx;
-    float playerPy;
-    float playerAngle;
-    float playerR;
-    float playerG;
-    float playerB;
-    int playerLife;
-    //ＰＣデータ
-    int pcHand;
-    int pcGuImg;
-    int pcChokiImg;
-    int pcPaImg;
-    int pcImg;
-    float pcPx;
-    float pcPy;
-    float pcAngle;
-    float pcR;
-    float pcG;
-    float pcB;
-    int pcLife;
-    //ハート画像番号
-    int heartImg;
-    //勝ち負け文字用
-    float resultPx;
-    float resultPy;
-    float resultSize;
-    //状態切り替え
     int INIT = 0;
     int PLAY = 1;
     int RESULT = 2;
     int state = INIT;
+
+    int GU = 0;
+    int CHOKI = 1;
+    int PA = 2;
+    struct HAND player;
+    struct HAND pc;
+    struct RESULT_TEXT resultText;
 };
 
+void drawHands(struct DATA* d);
+void drawResultText(struct DATA* d);
+
 void loadImages(struct DATA* d) {
-    //画像読み込み-----------------------------------------------------
-    d->playerGuImg = loadImage("assets\\playerGu.png");
-    d->playerChokiImg = loadImage("assets\\playerChoki.png");
-    d->playerPaImg = loadImage("assets\\playerPa.png");
-    d->pcGuImg = loadImage("assets\\pcGu.png");
-    d->pcChokiImg = loadImage("assets\\pcChoki.png");
-    d->pcPaImg = loadImage("assets\\pcPa.png");
-    d->heartImg = loadImage("assets\\heart.png");
+    d->player.img[d->GU] = loadImage("assets\\playerGu.png");
+    d->player.img[d->CHOKI] = loadImage("assets\\playerChoki.png");
+    d->player.img[d->PA] = loadImage("assets\\playerPa.png");
+    d->player.heartImg = loadImage("assets\\heart.png");
+    d->pc.img[d->GU] = loadImage("assets\\pcGu.png");
+    d->pc.img[d->CHOKI] = loadImage("assets\\pcChoki.png");
+    d->pc.img[d->PA] = loadImage("assets\\pcPa.png");
+    d->pc.heartImg = d->player.heartImg;
 }
 void init(struct DATA* d) {
-    //試合直前初期値設定
-    //プレイヤーデータ
-    d->playerHand = d->GU;
-    d->playerImg = d->playerGuImg;
-    d->playerPx = 250;
-    d->playerPy = 225;
-    d->playerAngle = 0;
-    d->playerR = 255;
-    d->playerG = 255;
-    d->playerB = 255;
-    d->playerLife = 3;
-    //ＰＣデータ
-    d->pcHand = d->GU;
-    d->pcImg = d->pcGuImg;
-    d->pcPx = 550;
-    d->pcPy = 225;
-    d->pcAngle = 0;
-    d->pcR = 255;
-    d->pcG = 255;
-    d->pcB = 255;
-    d->pcLife = 3;
-    //勝ち負け文字
-    d->resultPx = 225;
-    d->resultPy = 320;
-    d->resultSize = 0;
-    //ゲームステート切り替え
+    d->player.hand = d->GU;
+    d->player.px = 250;
+    d->player.py = 225;
+    d->player.r = 255;
+    d->player.g = 255;
+    d->player.b = 255;
+    d->player.life = 3;
+    d->player.angle = 0;
+
+    d->pc.hand = d->GU;
+    d->pc.px = 550;
+    d->pc.py = 225;
+    d->pc.r = 255;
+    d->pc.g = 255;
+    d->pc.b = 255;
+    d->pc.life = 3;
+    d->pc.angle = 0;
+
+    d->resultText.str = "勝ち";
+    d->resultText.r = 255;
+    d->resultText.g = 0;
+    d->resultText.b = 0;
+    d->resultText.px = 255;
+    d->resultText.py = 320;
+    d->resultText.size = 0;
+    
+    drawHands(d);
+
+    //ステート切り替え
     d->state = d->PLAY;
 }
 void play(struct DATA* d) {
-    //A,S,Dのキーはどれも押されていない
     if (!isTrigger(KEY_A) && !isTrigger(KEY_S) && !isTrigger(KEY_D)) {
-        draw(d);
         return;
     }
-    //プレイヤーの手を決める---------------------------------------
-    if      (isTrigger(KEY_A)) { d->playerHand = d->GU; }
-    else if (isTrigger(KEY_S)) { d->playerHand = d->CHOKI; }
-    else if (isTrigger(KEY_D)) { d->playerHand = d->PA; }
-    //プレイヤーの画像を切り替える
-    if      (d->playerHand == d->GU   ) { d->playerImg = d->playerGuImg; }
-    else if (d->playerHand == d->CHOKI) { d->playerImg = d->playerChokiImg; }
-    else if (d->playerHand == d->PA   ) { d->playerImg = d->playerPaImg; }
-    //ＰＣの手を決める---------------------------------------------
-    d->pcHand = random() % 3;
-    //ＰＣの画像を切り替える
-    if (d->pcHand == d->GU) { d->pcImg = d->pcGuImg; }
-    else if (d->pcHand == d->CHOKI) { d->pcImg = d->pcChokiImg; }
-    else if (d->pcHand == d->PA) { d->pcImg = d->pcPaImg; }
-    //勝ち負け判定し、色を変える-----------------------------------
-    if (d->playerHand == d->pcHand) {
+    //プレイヤーの手
+    if (isTrigger(KEY_A)) { d->player.hand = d->GU; }
+    if (isTrigger(KEY_S)) { d->player.hand = d->CHOKI; }
+    if (isTrigger(KEY_D)) { d->player.hand = d->PA; }
+    //ＰＣの手
+    d->pc.hand = random() % 3;
+    //結果判定
+    if (d->player.hand == d->pc.hand) {
         //あいこ
-        d->playerR = 255; d->playerG = 255; d->playerB = 255;
-        d->pcR = 255; d->pcG = 255; d->pcB = 255;
+        d->player.r = 255; d->player.g = 255; d->player.b = 255;
+        d->pc.r = 255; d->pc.g = 255; d->pc.b = 255;
     }
-    else if ((d->playerHand + 1) % 3 == d->pcHand) {
+    else if ((d->player.hand + 1) % 3 == d->pc.hand) {
         //プレイヤー勝ち
-        d->playerR = 255; d->playerG = 200; d->playerB = 200;
-        d->pcR = 255; d->pcG = 255; d->pcB = 255;
-        d->pcLife--;
+        d->pc.life--;
+        d->player.r = 255; d->player.g = 200; d->player.b = 200;
+        d->pc.r = 255; d->pc.g = 255; d->pc.b = 255;
     }
     else {
         //ＰＣ勝ち
-        d->playerR = 255; d->playerG = 255; d->playerB = 255;
-        d->pcR = 255; d->pcG = 200; d->pcB = 200;
-        d->playerLife--;
+        d->player.life--;
+        d->player.r = 255; d->player.g = 255; d->player.b = 255;
+        d->pc.r = 255; d->pc.g = 200; d->pc.b = 200;
     }
-    //描画---------------------------------------------------------
-    draw(d);
-    //ゲームステート切り替え---------------------------------------
-    if (d->playerLife == 0 || d->pcLife == 0) {
+    //描画
+    drawHands(d);
+    //ステート切り替え
+    if (d->player.life == 0 || d->pc.life == 0) {
+        if (d->player.life == 0) {
+            d->resultText.str = "負け";
+            d->resultText.r = 0;
+            d->resultText.g = 0;
+            d->resultText.b = 200;
+        }
         d->state = d->RESULT;
     }
 }
 void result(struct DATA* d) {
-    if (d->pcLife == 0) {
-        //ＰＣ負け
-        d->pcPy += 1.0f;
-        d->pcAngle += -0.005f;
+    //負けた手が回転しながら落ちていく
+    if (d->player.life == 0) {
+        d->player.py += 1;
+        d->player.angle += 0.003f;
     }
     else {
-        //プレイヤー負け
-        d->playerPy += 1.0f;
-        d->playerAngle += 0.005f;
+        d->pc.py += 1;
+        d->pc.angle += -0.003f;
     }
-    //勝ち負け文字を大きくしていく
-    if (d->resultSize < 180) {
-        d->resultSize += 10.0f;
+    //結果文字拡大
+    if (d->resultText.size < 180) {
+        d->resultText.size += 10;
     }
     //描画
-    draw(d);
-    drawResult(d);
-
-    //ゲームステート切り替え
+    drawHands(d);
+    drawResultText(d);
+    //ステート切り替え
     if (isTrigger(KEY_SPACE)) {
         d->state = d->INIT;
     }
 }
-void draw(struct DATA* d) {
-    clear(200);
-    //プレイヤーの手
+
+void drawHand(struct HAND* hand) {
+    //手
     rectMode(CENTER);
-    imageColor(d->playerR, d->playerG, d->playerB);
-    image(d->playerImg, d->playerPx, d->playerPy, d->playerAngle);
-    //ＰＣの手
-    imageColor(d->pcR, d->pcG, d->pcB);
-    image(d->pcImg, d->pcPx, d->pcPy, d->pcAngle);
-    //プレイヤーハート
+    imageColor(hand->r, hand->g, hand->b);
+    int i = hand->hand;
+    image(hand->img[i], hand->px, hand->py, hand->angle);
+    //ハート
     imageColor(255, 0, 0);
-    for (int i = 0; i < d->playerLife; i++) {
-        image(d->heartImg, d->playerPx - 50 + i * 50, d->playerPy - 110);
-    }
-    //ＰＣハート
-    for (int i = 0; i < d->pcLife; i++) {
-        image(d->heartImg, d->pcPx - 50 + i * 50, d->pcPy - 110);
+    for (i = 0; i < hand->life; i++) {
+        image(hand->heartImg, hand->px + 50 * (i - 1), hand->py - 100);
     }
 }
-void drawResult(struct DATA* d) {
-    textSize(d->resultSize);
-    if (d->playerLife > 0) {
-        fill(255, 0, 0);
-        text("勝ち", d->resultPx, d->resultPy);
-    }
-    else {
-        fill(0, 0, 200);
-        text("負け", d->resultPx, d->resultPy);
-    }
+void drawHands(struct DATA* d) {
+    clear(180);
+    drawHand(&d->player);
+    drawHand(&d->pc);
+}
+void drawResultText(struct DATA* d) {
+    textSize(d->resultText.size);
+    fill(d->resultText.r, d->resultText.g, d->resultText.b);
+    text(d->resultText.str, d->resultText.px, d->resultText.py);
 }
 
-void gmain(){
+void gmain() {
     //ウィンドウ表示
     window(800, 450);
     //データ用意
@@ -230,6 +210,4 @@ void gmain(){
         else if (d.state == d.RESULT) { result(&d); }
     }
 }
-
 #endif
-
