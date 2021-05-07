@@ -36,7 +36,7 @@ struct HAND {
     int heartImg;
     float px;
     float py;
-    float r, g, b;
+    struct COLOR color;
     float angle;
     int life;
 };
@@ -46,7 +46,7 @@ struct RESULT_TEXT {
     float px;
     float py;
     float size;
-    float r, g, b;
+    struct COLOR color;
 };
 
 struct DATA {
@@ -55,6 +55,10 @@ struct DATA {
     int RESULT = 2;
     int state = INIT;
 
+    struct COLOR pink = { 255,200,200 };
+    struct COLOR white = { 255,255,255 };
+    struct COLOR red = { 255,0,0 };
+    struct COLOR blue = { 0,0,200 };
     int GU = 0;
     int CHOKI = 1;
     int PA = 2;
@@ -80,25 +84,19 @@ void init(struct DATA* d) {
     d->player.hand = d->GU;
     d->player.px = 250;
     d->player.py = 225;
-    d->player.r = 255;
-    d->player.g = 255;
-    d->player.b = 255;
+    d->player.color = d->white;
     d->player.life = 3;
     d->player.angle = 0;
 
     d->pc.hand = d->GU;
     d->pc.px = 550;
     d->pc.py = 225;
-    d->pc.r = 255;
-    d->pc.g = 255;
-    d->pc.b = 255;
+    d->pc.color = d->white;
     d->pc.life = 3;
     d->pc.angle = 0;
 
     d->resultText.str = "Ÿ‚¿";
-    d->resultText.r = 255;
-    d->resultText.g = 0;
-    d->resultText.b = 0;
+    d->resultText.color = d->red;
     d->resultText.px = 255;
     d->resultText.py = 320;
     d->resultText.size = 0;
@@ -121,20 +119,20 @@ void play(struct DATA* d) {
     //Œ‹‰Ê”»’è
     if (d->player.hand == d->pc.hand) {
         //‚ ‚¢‚±
-        d->player.r = 255; d->player.g = 255; d->player.b = 255;
-        d->pc.r = 255; d->pc.g = 255; d->pc.b = 255;
+        d->player.color = d->white;
+        d->pc.color = d->white;
     }
     else if ((d->player.hand + 1) % 3 == d->pc.hand) {
         //ƒvƒŒƒCƒ„[Ÿ‚¿
         d->pc.life--;
-        d->player.r = 255; d->player.g = 200; d->player.b = 200;
-        d->pc.r = 255; d->pc.g = 255; d->pc.b = 255;
+        d->player.color = d->pink;
+        d->pc.color = d->white;
     }
     else {
         //‚o‚bŸ‚¿
         d->player.life--;
-        d->player.r = 255; d->player.g = 255; d->player.b = 255;
-        d->pc.r = 255; d->pc.g = 200; d->pc.b = 200;
+        d->player.color = d->white;
+        d->pc.color = d->pink;
     }
     //•`‰æ
     drawHands(d);
@@ -142,9 +140,7 @@ void play(struct DATA* d) {
     if (d->player.life == 0 || d->pc.life == 0) {
         if (d->player.life == 0) {
             d->resultText.str = "•‰‚¯";
-            d->resultText.r = 0;
-            d->resultText.g = 0;
-            d->resultText.b = 200;
+            d->resultText.color = d->blue;
         }
         d->state = d->RESULT;
     }
@@ -175,7 +171,7 @@ void result(struct DATA* d) {
 void drawHand(struct HAND* hand) {
     //Žè
     rectMode(CENTER);
-    imageColor(hand->r, hand->g, hand->b);
+    imageColor(hand->color);
     int i = hand->hand;
     image(hand->img[i], hand->px, hand->py, hand->angle);
     //ƒn[ƒg
@@ -191,7 +187,7 @@ void drawHands(struct DATA* d) {
 }
 void drawResultText(struct DATA* d) {
     textSize(d->resultText.size);
-    fill(d->resultText.r, d->resultText.g, d->resultText.b);
+    fill(d->resultText.color);
     text(d->resultText.str, d->resultText.px, d->resultText.py);
 }
 
